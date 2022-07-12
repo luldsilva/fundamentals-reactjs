@@ -5,10 +5,9 @@ import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
 
-const comment = [1, 2, 3];
-
 export function Post(props) {
-  const [comment, setComment] = useState([1, 2]);
+  const [comment, setComment] = useState([]);
+  const [newCommentText, setNewCommentText] = useState("");
   const publishedDateFormatted = format(
     props.publishedAt,
     "dd 'de' LLLL 'às' HH:mm'h'",
@@ -24,7 +23,20 @@ export function Post(props) {
   function handleCreateNewComment() {
     event.preventDefault();
 
-    setComment([...comment, comment.length + 1]);
+    setComment([...comment, newCommentText]);
+    setNewCommentText("");
+  }
+
+  function handleNewComment() {
+    setNewCommentText(event.target.value);
+  }
+
+  function deleteComment(commentToDelete) {
+    console.log("Entrou no deleteComment");
+    const commentsWithoutDeleted = comment.filter((com) => {
+      return com !== commentToDelete;
+    });
+    setComment(commentsWithoutDeleted);
   }
 
   return (
@@ -48,10 +60,10 @@ export function Post(props) {
       <div className={styles.content}>
         {props.content.map((line) => {
           if (line.type === "paragraph") {
-            return <p>{line.content}</p>;
+            return <p key={line.content}>{line.content}</p>;
           } else if (line.type === "link") {
             return (
-              <p>
+              <p key={line.content}>
                 👉 <a href="#">{line.content}</a>
               </p>
             );
@@ -61,7 +73,12 @@ export function Post(props) {
 
       <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong>Deixe aqui seu feedback</strong>
-        <textarea placeholder="Deixe um comentario" />
+        <textarea
+          name="comment"
+          placeholder="Deixe um comentario"
+          value={newCommentText}
+          onChange={handleNewComment}
+        />
         <footer>
           <button type="submit">Publicar</button>
         </footer>
@@ -69,7 +86,13 @@ export function Post(props) {
 
       <div className={styles.commentList}>
         {comment.map((comment) => {
-          return <Comment />;
+          return (
+            <Comment
+              key={comment}
+              content={comment}
+              onDeleteComment={deleteComment}
+            />
+          );
         })}
       </div>
     </article>
